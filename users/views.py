@@ -14,6 +14,7 @@ from django.contrib.auth.hashers import make_password
 
 from .serializers import LoginSerializer, RegisterationSerializer
 from .models import User
+from .utils import generate_jwt_token
 
 
 
@@ -40,26 +41,30 @@ class LoginView(viewsets.ViewSet):
             print("user: ", user)
             if user: 
                 if check_password(password, user.password):
-                    jwt_token = RefreshToken.for_user(user)
+                    # jwt_token = RefreshToken.for_user(user)
 
-                    user.refreshToken = str(jwt_token)
-                    user.accessToken = str(jwt_token.access_token)
-                    user.tokenExpiry = datetime.datetime.fromtimestamp(jwt_token['exp'], tz=datetime.timezone.utc)
-                    User.objects.filter(email=user.email).update(
-                        refreshToken=user.refreshToken, 
-                        accessToken=user.accessToken,
-                        tokenExpiry=user.tokenExpiry,
-                        creationDate= datetime.datetime.fromtimestamp(jwt_token['iat'], tz=datetime.timezone.utc)
-                        )
-                    return Response({
-                        "status": True,
-                        "message": "Login successful",
+                    # user.refreshToken = str(jwt_token)
+                    # user.accessToken = str(jwt_token.access_token)
+                    # user.tokenExpiry = datetime.datetime.fromtimestamp(jwt_token['exp'], tz=datetime.timezone.utc)
+                    # User.objects.filter(email=user.email).update(
+                    #     refreshToken=user.refreshToken, 
+                    #     accessToken=user.accessToken,
+                    #     tokenExpiry=user.tokenExpiry,
+                    #     creationDate= datetime.datetime.fromtimestamp(jwt_token['iat'], tz=datetime.timezone.utc)
+                    #     )
+                    token = generate_jwt_token(user.email)
+                    # return Response({
+                    #     "status": True,
+                    #     "message": "Login successful",
 
-                        "data": {
-                          "refresh_token": user.refreshToken,
-                          "access_token": user.accessToken
-                        }
-                    })
+                    #     "data": {
+                    #       "access_token": token
+                    #     }
+                    # })
+                    return Response({"details": {
+                        "message": "Logged in successfully",
+                        "token": token
+                    }}, status=status.HTTP_200_OK)
                 else:
                     return Response({
                         "status": False,

@@ -25,13 +25,14 @@ class AddBookSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "Description must be at least 10 characters"
                 )
+                
         return data
 
 
 class UpdateBookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = '__all__'
+        fields = ["title", "author", "description", "bookImage"]
 
     def validate(self, data):
         if "title" in data:
